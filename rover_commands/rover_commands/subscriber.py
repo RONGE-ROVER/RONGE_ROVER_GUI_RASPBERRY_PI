@@ -20,7 +20,7 @@ class TrajectorySubscriber(Node):
         self.client = self.create_client(CheckPosition, 'check_position')
         
         # Attendre que le service soit disponible
-        while not self.client.wait_for_service(timeout_sec=1.0):
+        while not self.client.wait_for_service(timeout_sec=7.0):
             self.get_logger().info('Service not available, waiting...')
 
         self.get_logger().info('Subscriber node has been started.')
