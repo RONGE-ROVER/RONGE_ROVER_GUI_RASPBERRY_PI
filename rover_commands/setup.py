@@ -24,6 +24,9 @@ setup(
         'subscriber = rover_commands.subscriber:main',
         'check_position_server = rover_commands.check_position_server:main',
         'subscriber_sans_serv = rover_commands.subscriber_sans_serv:main',
+        'publisher_arduino = rover_commands.publisher_arduino:main',
+        'subscriber_arduino = rover_commands.subscriber_arduino:main',
+        'publisher_recup_arduino = rover_commands.publisher_recup_arduino:main',
     ],
     },
 )

@@ -1,0 +1,36 @@
+import rospy
+import serial
+import time
+from std_msgs.msg import Float32
+
+def main():
+    # Configuration du port série
+    port = '/dev/ttyUSB0'  # À ajuster si nécessaire
+    baudrate = 9600
+    ser = serial.Serial(port, baudrate)
+
+    # Initialisation du noeud ROS
+    rospy.init_node('publisher_recup_arduino', anonymous=True)
+
+    # Création du publisher
+    pub = rospy.Publisher('/arduino_data', Float32, queue_size=10)
+
+    # Attente pour établir la communication série
+    time.sleep(2)
+
+    while not rospy.is_shutdown():
+        if ser.in_waiting > 0:
+            data = ser.readline().decode('utf-8').strip()
+            try:
+                valeur_recue = float(data)
+                rospy.loginfo(f"Valeur reçue de l'Arduino : {valeur_recue}")
+                pub.publish(valeur_recue)
+            except ValueError:
+                rospy.logwarn("Données non valides reçues.")
+        time.sleep(0.1)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
