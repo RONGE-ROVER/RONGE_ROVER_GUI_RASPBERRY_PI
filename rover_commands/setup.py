@@ -23,6 +23,7 @@ setup(
         'publisher = rover_commands.publisher:main',
         'subscriber = rover_commands.subscriber:main',
         'check_position_server = rover_commands.check_position_server:main',
+        'subscriber_sans_serv = rover_commands.subscriber_sans_serv:main',
     ],
     },
 )
