@@ -3,15 +3,28 @@
 <package format="3">
   <name>rover_commands</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Package to publish data from Arduino via USB</description>
+  
+  <!-- Information du mainteneur et licence -->
   <maintainer email="xplore@todo.todo">xplore</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache-2.0</license> <!-- Remplace par la licence appropriée -->
 
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
+  <!-- Dépendances d'exécution -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+
+  <!-- Dépendances de build -->
+  <build_depend>rosidl_default_generators</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>ament_python</build_depend>
+  
+  <!-- Dépendances de test -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
   <test_depend>python3-pytest</test_depend>
   
+  <!-- Exportation du type de build -->
   <export>
     <build_type>ament_python</build_type>
   </export>
