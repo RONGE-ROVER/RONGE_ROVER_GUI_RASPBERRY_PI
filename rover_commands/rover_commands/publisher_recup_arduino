@@ -1,36 +1,51 @@
-import rospy
+import rclpy
+from rclpy.node import Node
 import serial
 import time
 from std_msgs.msg import Float32
 
-def main():
-    # Configuration du port série
-    port = '/dev/ttyUSB0'  # À ajuster si nécessaire
-    baudrate = 9600
-    ser = serial.Serial(port, baudrate)
+class ArduinoPublisher(Node):
+    def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
+        # Initialisation de la classe Node
+        super().__init__('publisher_recup_arduino')
+        
+        # Configuration du port série
+        self.port = port
+        self.baudrate = baudrate
+        self.ser = serial.Serial(self.port, self.baudrate)
 
-    # Initialisation du noeud ROS
-    rospy.init_node('publisher_recup_arduino', anonymous=True)
+        # Création du publisher
+        self.pub = self.create_publisher(Float32, '/arduino_data', 10)
 
-    # Création du publisher
-    pub = rospy.Publisher('/arduino_data', Float32, queue_size=10)
+        # Attente pour établir la communication série
+        time.sleep(2)
 
-    # Attente pour établir la communication série
-    time.sleep(2)
+        # Initialisation du timer pour appeler la méthode de lecture périodiquement
+        self.timer = self.create_timer(0.1, self.read_serial_data)
 
-    while not rospy.is_shutdown():
-        if ser.in_waiting > 0:
-            data = ser.readline().decode('utf-8').strip()
+    def read_serial_data(self):
+        # Lecture des données du port série
+        if self.ser.in_waiting > 0:
+            data = self.ser.readline().decode('utf-8').strip()
             try:
                 valeur_recue = float(data)
-                rospy.loginfo(f"Valeur reçue de l'Arduino : {valeur_recue}")
-                pub.publish(valeur_recue)
+                self.get_logger().info(f"Valeur reçue de l'Arduino : {valeur_recue}")
+                self.pub.publish(Float32(data=valeur_recue))
             except ValueError:
-                rospy.logwarn("Données non valides reçues.")
-        time.sleep(0.1)
+                self.get_logger().warn("Données non valides reçues.")
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    # Instanciation du noeud
+    node = ArduinoPublisher()
+
+    # Exécution du noeud ROS
+    rclpy.spin(node)
+
+    # Fermeture du noeud proprement
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == "__main__":
-    try:
-        main()
-    except rospy.ROSInterruptException:
-        pass
+    main()
