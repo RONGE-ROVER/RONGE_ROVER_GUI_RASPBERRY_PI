@@ -8,7 +8,7 @@ class ArduinoPublisher(Node):
     def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
         # Initialisation de la classe Node
         super().__init__('publisher_recup_arduino')
-        
+        #aaa
         # Configuration du port série
         self.port = port
         self.baudrate = baudrate
