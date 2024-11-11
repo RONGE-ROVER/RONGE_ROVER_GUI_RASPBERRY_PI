@@ -19,7 +19,7 @@ class TrajectoryPublisher(Node):
         self.timer = self.create_timer(0.1, self.cmd_acquisition)
 
     def cmd_acquisition(self):
-            command = input("Enter command (z/q/s/d/t/y - max 2 characters): ")
+            command = self.stdscr.getch()
             
             # Création du message Twist
             msg = Twist()
