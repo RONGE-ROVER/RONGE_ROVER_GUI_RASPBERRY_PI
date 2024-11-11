@@ -19,17 +19,21 @@ class TrajectoryPublisher(Node):
         self.timer = self.create_timer(0.1, self.cmd_acquisition)
 
     def cmd_acquisition(self):
-        msg = Twist()  # Créer un message Twist vide
+        # Initialisation explicite des champs pour s'assurer qu'ils sont des floats
+        msg = Twist()
+        msg.linear.x = 0.0
+        msg.angular.z = 0.0
+
         key = self.stdscr.getch()
 
         if key == ord('w'):  # Avancer
-            msg.linear.x = min(255, msg.linear.x + 1.0)
+            msg.linear.x = min(255.0, msg.linear.x + 1.0)
         elif key == ord('s'):  # Reculer
-            msg.linear.x = max(-255, msg.linear.x - 1.0)
+            msg.linear.x = max(-255.0, msg.linear.x - 1.0)
         elif key == ord('a'):  # Tourner à gauche
-            msg.angular.z = min(180, msg.angular.z + 1.0)
+            msg.angular.z = min(180.0, msg.angular.z + 1.0)
         elif key == ord('f'):  # Tourner à droite
-            msg.angular.z = max(0, msg.angular.z - 1.0)
+            msg.angular.z = max(0.0, msg.angular.z - 1.0)
         elif key == ord('t'):  # Arrêt
             msg.linear.x = 0.0
             msg.angular.z = 0.0
