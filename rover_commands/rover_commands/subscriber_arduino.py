@@ -19,10 +19,9 @@ class TrajectorySubscriber(Node):
 
         self.get_logger().info('Subscriber node has been started.')
        
-        # Position initiale (renommée en data1, data2, data3)
+        # Position initiale (seulement data1 et data2)
         self.data1 = 0.0  # Correspond à x
-        self.data2 = 0.0  # Correspond à z
-        self.data3 = 0.0  # Correspond à ry
+        self.data2 = 0.0  # Correspond à ry
 
         # Configuration du port série
         try:
@@ -34,17 +33,16 @@ class TrajectorySubscriber(Node):
             self.serial_port = None
 
     def listener_callback(self, msg):
-        # Mettre à jour les variables data1, data2, et data3 en fonction des commandes reçues
+        # Mettre à jour les variables data1 et data2 en fonction des commandes reçues
         self.data1 += msg.linear.x  # x
-        self.data2 += msg.linear.z  # z
-        self.data3 += msg.angular.z  # ry
+        self.data2 += msg.angular.z  # ry
 
         # Log de la nouvelle position
-        self.get_logger().info(f'New Data: data1={self.data1}, data2={self.data2}, data3={self.data3}')
+        self.get_logger().info(f'New Data: data1={self.data1}, data2={self.data2}')
 
         # Envoyer les données à l'Arduino si le port série est connecté
         if self.serial_port:
-            data_string = f'{self.data1},{self.data2},{self.data3}\n'
+            data_string = f'{self.data1},{self.data2}\n'
             try:
                 self.serial_port.write(data_string.encode())
                 self.get_logger().info(f'Sent to Arduino: {data_string}')
