@@ -20,26 +20,23 @@ class TrajectoryPublisher(Node):
 
     def cmd_acquisition(self):
         msg = Twist()  # Créer un message Twist vide
-
-        # Lire la touche pressée
         key = self.stdscr.getch()
 
-        # Assigner les valeurs en fonction de la touche pressée
         if key == ord('w'):  # Avancer
-            msg.linear.x = 1.0
+            msg.linear.x = min(255, msg.linear.x + 1.0)
         elif key == ord('s'):  # Reculer
-            msg.linear.x = -1.0
+            msg.linear.x = max(-255, msg.linear.x - 1.0)
         elif key == ord('a'):  # Tourner à gauche
-            msg.angular.z = 1.0
+            msg.angular.z = min(180, msg.angular.z + 1.0)
         elif key == ord('d'):  # Tourner à droite
-            msg.angular.z = -1.0
+            msg.angular.z = max(0, msg.angular.z - 1.0)
         elif key == ord('t'):  # Arrêt
             msg.linear.x = 0.0
             msg.angular.z = 0.0
 
-        # Publier le message seulement si une touche pertinente est pressée
         if msg.linear.x != 0.0 or msg.angular.z != 0.0:
             self.publisher_.publish(msg)
+
 
 def main(args=None):
     rclpy.init(args=args)  # Initialiser ROS 2 pour Python
