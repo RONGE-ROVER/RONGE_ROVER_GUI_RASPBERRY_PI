@@ -34,20 +34,25 @@ class TrajectorySubscriber(Node):
 
     def listener_callback(self, msg):
         # Mettre à jour les variables data1 et data2 en fonction des commandes reçues
-        self.data1 += msg.angular.z  # x permet de donner une vitesse
-        self.data2 += msg.linear.x# ry
+        self.data1 += msg.angular.z  # ry permet de donner une vitesse
+        self.data2 += msg.linear.x   # x
 
-        # Log de la nouvelle position
-        self.get_logger().info(f'New Data: data1={self.data1}, data2={self.data2}')
+        # Convertir data1 et data2 en entiers
+        data1_int = int(self.data1)
+        data2_int = int(self.data2)
+
+        # Log de la nouvelle position en tant qu'entiers
+        self.get_logger().info(f'New Data: data1={data1_int}, data2={data2_int}')
 
         # Envoyer les données à l'Arduino si le port série est connecté
         if self.serial_port:
-            data_string = f'{self.data1},{self.data2}\n'
+            data_string = f'{data1_int},{data2_int}\n'
             try:
                 self.serial_port.write(data_string.encode())
                 self.get_logger().info(f'Sent to Arduino: {data_string}')
             except serial.SerialException as e:
                 self.get_logger().error(f'Error sending data to Arduino: {e}')
+
 
     def destroy_node(self):
         # Fermer le port série proprement lors de la destruction du nœud
