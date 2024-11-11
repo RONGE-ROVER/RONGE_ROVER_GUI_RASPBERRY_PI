@@ -34,7 +34,7 @@ class TrajectorySubscriber(Node):
 
     def listener_callback(self, msg):
         # Mettre à jour les variables data1 et data2 en fonction des commandes reçues
-        self.data1 += msg.angular.z  # ry permet de donner une vitesse
+        self.data1 = msg.angular.z  # ry permet de donner une vitesse
         self.data2 += msg.linear.x   # x
 
         # Convertir data1 et data2 en entiers
