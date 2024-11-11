@@ -29,13 +29,13 @@ class TrajectoryPublisher(Node):
         elif key == ord('a'):  # Tourner à gauche
             msg.angular.z = min(180, msg.angular.z + 1.0)
         elif key == ord('d'):  # Tourner à droite
-            msg.angular.z = max(0.0, msg.angular.z - 1.0)
+            msg.angular.z = max(0, msg.angular.z - 1.0)
         elif key == ord('t'):  # Arrêt
             msg.linear.x = 0.0
             msg.angular.z = 0.0
 
-        
-        self.publisher_.publish(msg)
+        if msg.linear.x != 0.0 or msg.angular.z != 0.0:
+            self.publisher_.publish(msg)
 
 
 def main(args=None):
