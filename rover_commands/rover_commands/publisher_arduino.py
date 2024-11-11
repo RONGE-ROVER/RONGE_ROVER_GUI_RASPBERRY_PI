@@ -30,12 +30,8 @@ class TrajectoryPublisher(Node):
             elif command == 's':
                 msg.linear.x = -1.0  # Recule
             elif command == 'q':
-                msg.linear.y = 1.0  # Gauche (si applicable)
-            elif command == 'd':
-                msg.linear.y = -1.0  # Droite (si applicable)
-            elif command == 't':
                 msg.angular.z = 1.0  # Rotation horaire
-            elif command == 'y':
+            elif command == 'd':
                 msg.angular.z = -1.0  # Rotation antihoraire
             else:
                 self.get_logger().info("Invalid command. Please use z, q, s, d, t, or y.")
