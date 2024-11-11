@@ -30,7 +30,7 @@ class TrajectoryPublisher(Node):
             msg.angular.z = min(180, msg.angular.z + 1.0)
         elif key == ord('d'):  # Tourner à droite
             msg.angular.z = max(0, msg.angular.z - 1.0)
-        elif key == ord('t'):  # Arrêt
+        elif key == ord('t'):  # Arrêtfqiusdrhfuiqeshfruis<whefgiuwsdjhfgiuswÏ
             msg.linear.x = 0.0
             msg.angular.z = 0.0
 
