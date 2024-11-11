@@ -19,28 +19,31 @@ class TrajectoryPublisher(Node):
         self.timer = self.create_timer(0.1, self.cmd_acquisition)
 
     def cmd_acquisition(self):
-        # Initialisation explicite des champs pour s'assurer qu'ils sont des floats
-        msg = Twist()
-        msg.linear.x = 0.0
-        msg.angular.z = 0.0
-
-        key = self.stdscr.getch()
-
-        if key == ord('w'):  # Avancer
-            msg.linear.x = min(255.0, msg.linear.x + 1.0)
-        elif key == ord('s'):  # Reculer
-            msg.linear.x = max(-255.0, msg.linear.x - 1.0)
-        elif key == ord('a'):  # Tourner à gauche
-            msg.angular.z = min(180.0, msg.angular.z + 1.0)
-        elif key == ord('f'):  # Tourner à droite
-            msg.angular.z = max(0.0, msg.angular.z - 1.0)
-        elif key == ord('t'):  # Arrêt
-            msg.linear.x = 0.0
-            msg.angular.z = 0.0
-
-        if msg.linear.x != 0.0 or msg.angular.z != 0.0:
+            command = input("Enter command (z/q/s/d/t/y - max 2 characters): ")
+            
+            # Création du message Twist
+            msg = Twist()
+            
+            # Traitement des commandes de direction
+            if command == 'z':
+                msg.linear.x = 1.0  # Avance
+            elif command == 's':
+                msg.linear.x = -1.0  # Recule
+            elif command == 'q':
+                msg.linear.y = 1.0  # Gauche (si applicable)
+            elif command == 'd':
+                msg.linear.y = -1.0  # Droite (si applicable)
+            elif command == 't':
+                msg.angular.z = 1.0  # Rotation horaire
+            elif command == 'y':
+                msg.angular.z = -1.0  # Rotation antihoraire
+            else:
+                self.get_logger().info("Invalid command. Please use z, q, s, d, t, or y.")
+                return  # Ignore la commande invalide
+            
+            # Publication du message
             self.publisher_.publish(msg)
-
+            self.get_logger().info(f"Published message: {msg}")
 
 def main(args=None):
     rclpy.init(args=args)  # Initialiser ROS 2 pour Python
