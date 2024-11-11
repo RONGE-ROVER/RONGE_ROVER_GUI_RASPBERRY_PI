@@ -19,27 +19,28 @@ class TrajectoryPublisher(Node):
         self.timer = self.create_timer(0.1, self.cmd_acquisition)
 
     def cmd_acquisition(self):
-            command = self.stdscr.getch()
-            
-            # Création du message Twist
-            msg = Twist()
-            
-            # Traitement des commandes de direction
-            if command == 'z':
-                msg.linear.x = 1.0  # Avance
-            elif command == 's':
-                msg.linear.x = -1.0  # Recule
-            elif command == 'q':
-                msg.angular.z = 1.0  # Rotation horaire
-            elif command == 'd':
-                msg.angular.z = -1.0  # Rotation antihoraire
-            else:
-                self.get_logger().info("Invalid command. Please use z, q, s, d, t, or y.")
-                return  # Ignore la commande invalide
-            
-            # Publication du message
+        # Initialisation explicite des champs pour s'assurer qu'ils sont des floats
+        msg = Twist()
+        msg.linear.x = 0.0
+        msg.angular.z = 0.0
+
+        key = self.stdscr.getch()
+
+        if key == ord('w'):  # Avancer
+            msg.linear.x = 1.0
+        elif key == ord('s'):  # Reculer
+            msg.linear.x = (-1.0)
+        elif key == ord('a'):  # Tourner à gauche
+            msg.angular.z = 1.0
+        elif key == ord('f'):  # Tourner à droite
+            msg.angular.z = (-1.0)
+        elif key == ord('t'):  # Arrêt
+            msg.linear.x = 0.0
+            msg.angular.z = 0.0
+
+        if msg.linear.x != 0.0 or msg.angular.z != 0.0:
             self.publisher_.publish(msg)
-            self.get_logger().info(f"Published message: {msg}")
+
 
 def main(args=None):
     rclpy.init(args=args)  # Initialiser ROS 2 pour Python
