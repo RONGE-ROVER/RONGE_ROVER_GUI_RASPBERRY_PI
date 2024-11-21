@@ -1,15 +1,18 @@
+#Code pour la rpi4 en tant que master
+
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 import serial
 import time
+import math
 
 class TrajectorySubscriber(Node):
 
     def __init__(self):
         super().__init__('trajectory_subscriber')
 
-        # Créer un subscriber de type Twist qui appelle listener_callback
+        # Créer un subscriber de type Twist
         self.subscription = self.create_subscription(
             Twist,
             '/cmd_vel_arduino',  # Le topic auquel s'abonner
@@ -18,46 +21,60 @@ class TrajectorySubscriber(Node):
         )
 
         self.get_logger().info('Subscriber node has been started.')
-       
-        # Position initiale (seulement data1 et data2)
-        self.data1 = 0.0  # Correspond à x
-        self.data2 = 0.0  # Correspond à ry
 
-        # Configuration du port série
+        # Paramètres fixes du véhicule
+        self.L = 2.5  # Empattement (en mètres)
+        self.W = 1.5  # Voie (en mètres)
+
+        # Position initiale pour l'angle et la vitesse
+        self.data1 = 0.0  # Angle accumulé autour de l'axe z on envoie une valeur en radians
+        self.data2 = 0.0  # Vitesse longitudinale (centre de masse)
+
+        # Configuration des ports série pour plusieurs Arduino slaves
         try:
-            self.serial_port = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-            time.sleep(2)  # Attendre un peu pour que la connexion série se stabilise
-            self.get_logger().info('Serial port connected successfully.')
+            self.serial_ports = [
+                serial.Serial('/dev/ttyUSB0', 9600, timeout=1),  # Arduino Nano 1
+                serial.Serial('/dev/ttyUSB1', 9600, timeout=1),  # Arduino Nano 2
+                serial.Serial('/dev/ttyUSB2', 9600, timeout=1),  # Arduino Nano 3
+            ]
+            time.sleep(2)  # Attendre pour stabiliser les connexions série
+            self.get_logger().info('Serial ports connected successfully.')
         except serial.SerialException as e:
-            self.get_logger().error(f'Failed to connect to serial port: {e}')
-            self.serial_port = None
+            self.get_logger().error(f'Failed to connect to one or more serial ports: {e}')
+            self.serial_ports = []
 
     def listener_callback(self, msg):
-        # Mettre à jour les variables data1 et data2 en fonction des commandes reçues
-        self.data1 += msg.angular.z  # ry permet de donner une vitesse
-        self.data2 += msg.linear.x   # x
+        # Mettre à jour l'angle accumulé et la vitesse en fonction des commandes reçues 
+        #NE PAS OUBLIER DE METTRE DES BORNES POUR NE PAS INCREMENTER DANS LE VIDE
+        self.data1 += msg.angular.z  # ry permet de donner l'angle de rotation
+        self.data2 += msg.linear.x   # x donne la vitesse de x
 
-        # Convertir data1 et data2 en entiers
-        data1_int = int(self.data1)
-        data2_int = int(self.data2)
+        # Calcul du rayon de braquage R
+        if self.data1 == 0:
+            R = 1e3  # Une valeur suffisamment grande (1 km) pour simuler une trajectoire rectiligne
+        else:
+            R = self.L / math.tan(self.data1) #tan(θ) est calculé en radians. Assure-toi que data1 (l'angle) est bien en radians avant ce calcul.
 
-        # Log de la nouvelle position en tant qu'entiers
-        self.get_logger().info(f'New Data: data1={data1_int}, data2={data2_int}')
 
-        # Envoyer les données à l'Arduino si le port série est connecté
-        if self.serial_port:
-            data_string = f'{data1_int},{data2_int}\n'
+        # Log des nouvelles données calculées
+        self.get_logger().info(f'L={self.L}, W={self.W}, v={self.data2:.2f}, R={R:.2f}')
+
+        # Format des données à envoyer : "L,W,v,R"
+        data_string = f'{self.L},{self.W},{self.data2:.2f},{R:.2f}\n'
+
+        # Envoi des données à chaque Arduino slave
+        for i, serial_port in enumerate(self.serial_ports):
             try:
-                self.serial_port.write(data_string.encode())
-                self.get_logger().info(f'Sent to Arduino: {data_string}')
+                serial_port.write(data_string.encode())
+                self.get_logger().info(f'Sent to Arduino {i + 1}: {data_string.strip()}')
             except serial.SerialException as e:
-                self.get_logger().error(f'Error sending data to Arduino: {e}')
-
+                self.get_logger().error(f'Error sending data to Arduino {i + 1}: {e}')
 
     def destroy_node(self):
-        # Fermer le port série proprement lors de la destruction du nœud
-        if self.serial_port:
-            self.serial_port.close()
+        # Fermer proprement les ports série lors de la destruction du nœud
+        for serial_port in self.serial_ports:
+            if serial_port:
+                serial_port.close()
         super().destroy_node()
 
 def main(args=None):
