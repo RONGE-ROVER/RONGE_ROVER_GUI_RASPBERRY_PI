@@ -26,13 +26,13 @@ class TrajectoryPublisher(Node):
 
         key = self.stdscr.getch()
 
-        if key == ord('w'):  # Avancer
+        if key == ord('z'):  # Avancer
             msg.linear.x = 1.0
         elif key == ord('s'):  # Reculer
             msg.linear.x = (-1.0)
-        elif key == ord('a'):  # Tourner à gauche
+        elif key == ord('q'):  # Tourner à gauche
             msg.angular.z = 1.0
-        elif key == ord('f'):  # Tourner à droite
+        elif key == ord('d'):  # Tourner à droite
             msg.angular.z = (-1.0)
         elif key == ord('t'):  # Arrêt
             msg.linear.x = 0.0
